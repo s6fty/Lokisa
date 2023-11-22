@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>774</width>
+    <height>673</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Lokisa</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="1" column="0">
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="0" column="1" rowspan="8">
+     <spacer name="verticalSpacer">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>40</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="7" column="0">
+     <widget class="QListWidget" name="listWidget"/>
+    </item>
+    <item row="2" column="0">
+     <widget class="QLineEdit" name="lineEdit"/>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Enter tag</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Tags</string>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="2" rowspan="8">
+     <widget class="QListWidget" name="listWidget_2">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>601</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="iconSize">
+       <size>
+        <width>200</width>
+        <height>200</height>
+       </size>
+      </property>
+      <property name="resizeMode">
+       <enum>QListView::Adjust</enum>
+      </property>
+      <property name="viewMode">
+       <enum>QListView::IconMode</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="3" column="0">
+     <spacer name="horizontalSpacer_3">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="4" column="0">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Add tag</string>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+  <widget class="QMenuBar" name="menubar">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>774</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <widget class="QMenu" name="menuFile">
+    <property name="title">
+     <string>File</string>
+    </property>
+    <widget class="QMenu" name="menuAdd_files">
+     <property name="title">
+      <string>Add to database</string>
+     </property>
+     <addaction name="separator"/>
+     <addaction name="separator"/>
+     <addaction name="actionAdd_folder"/>
+     <addaction name="actionAdd_files_2"/>
+    </widget>
+    <addaction name="menuAdd_files"/>
+    <addaction name="separator"/>
+    <addaction name="actionSave_database_2"/>
+    <addaction name="actionLoad_Database"/>
+   </widget>
+   <widget class="QMenu" name="menuEdit">
+    <property name="title">
+     <string>Edit</string>
+    </property>
+    <addaction name="actionRemove_duplicates"/>
+   </widget>
+   <addaction name="menuFile"/>
+   <addaction name="menuEdit"/>
+  </widget>
+  <widget class="QStatusBar" name="statusbar"/>
+  <action name="actionAdd_folder">
+   <property name="text">
+    <string>Add folder</string>
+   </property>
+  </action>
+  <action name="actionAdd_files_2">
+   <property name="text">
+    <string>Add files</string>
+   </property>
+  </action>
+  <action name="actionRemove_duplicates">
+   <property name="text">
+    <string>Remove duplicates</string>
+   </property>
+  </action>
+  <action name="actionSave_database">
+   <property name="text">
+    <string>Save database</string>
+   </property>
+  </action>
+  <action name="actionSave_database_2">
+   <property name="text">
+    <string>Save database</string>
+   </property>
+  </action>
+  <action name="actionLoad_Database">
+   <property name="text">
+    <string>Load database</string>
+   </property>
+  </action>
+ </widget>
+ <resources/>
+ <connections/>
+</ui>
