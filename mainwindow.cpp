@@ -89,7 +89,7 @@ void MainWindow::on_actionAdd_folder_triggered()
 {
     QDir folderName;
     folderName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"",QFileDialog::ShowDirsOnly);    // it says deprecated maybe change in future
-    QStringList images = folderName.entryList(QStringList() << "*.jpg" << "*.JPG" << "*.jpeg" << "*.JPEG" << "*.png" << "*.PNG",QDir::Files); // only jpg, jpeg and png now webm and mp4 in future
+    QStringList images = folderName.entryList(QStringList() << "*.jpg" << "*.JPG" << "*.jpeg" << "*.JPEG" << "*.png" << "*.PNG", QDir::Files); // only jpg, jpeg and png now webm and mp4 in future
     foreach (const QString file, images){
         QString Path = folderName.absolutePath().append("/" + file); // idk how to make this better it works so i wont touch that
         ui->listWidget_2->addItem(new QListWidgetItem(QIcon(Path), file));
@@ -103,12 +103,20 @@ void MainWindow::on_listWidget_2_itemDoubleClicked(QListWidgetItem *item)
 {
     QString fileName = ui->listWidget_2->currentItem()->text();
     QSqlQuery query;
-    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
-    query.addBindValue("%" + fileName + "%");
-    qDebug() << query.exec();
-    qDebug() << query.lastError();  // failing to get the filePath
-    QDesktopServices::openUrl(QUrl::fromLocalFile(fileName));
+    query.prepare("SELECT * FROM Files WHERE filePath LIKE :filename");
+    query.bindValue(":filename", "%" + fileName + "%");
+
+    if (query.exec()) {
+        while (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            qDebug() << "Found file path:" << filePath;
+            QDesktopServices::openUrl(QUrl::fromLocalFile(filePath));
+        }
+    } else {
+        qDebug() << "Query failed:" << query.lastError();
+    }
 }
+
 
 
 
@@ -125,8 +133,32 @@ void MainWindow::on_actionLoad_Database_triggered()
     for (int i = 0; i < readData.rowCount(); i++) {
         QString filePath = readData.record(i).field(1).value().toString();
         QString fileName = readData.record(i).field(2).value().toString();
-        ui->listWidget_2->addItem(new QListWidgetItem(QIcon(filePath), fileName));
+
+        bool fileExists = false;
+
+        for (int j; j < ui->listWidget_2->count(); j++){
+            if (ui->listWidget_2->item(j)->text() == fileName)
+            {
+                fileExists = true;
+                break;
+            }
+        }
+
+        if (!fileExists)
+            ui->listWidget_2->addItem(new QListWidgetItem(QIcon(filePath), fileName));
     }
 }
 
+
+
+void MainWindow::on_actionAdd_files_2_triggered()   // chatgpt generated code i cba
+{
+    QStringList selectedFiles = QFileDialog::getOpenFileNames(this, tr("Open file(s)"), "", tr("Image Files (*.jpg *.JPG *.jpeg *.JPEG *.png *.PNG);;All Files (*)"));
+
+    foreach (const QString &filePath, selectedFiles) {
+        QString fileName = QFileInfo(filePath).fileName();
+        ui->listWidget_2->addItem(new QListWidgetItem(QIcon(filePath), fileName));
+        DatabaseOperations().AddToDatabase(filePath, fileName);
+    }
+}
 

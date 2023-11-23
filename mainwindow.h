@@ -23,6 +23,8 @@ private slots:
 
     void on_actionLoad_Database_triggered();
 
+    void on_actionAdd_files_2_triggered();
+
 private:
     Ui::MainWindow *ui;
 };
