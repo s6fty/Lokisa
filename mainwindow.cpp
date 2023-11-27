@@ -47,7 +47,7 @@ public: void AddToDatabase(QString FilePath, QString FileName)
 
         if (!ifDbExists)
         {
-            query.prepare("CREATE TABLE IF NOT EXISTS Files(ID INTEGER PRIMARY KEY, filePath TEXT, fileName TEXT)");    // create table for newly created databases
+            query.prepare("CREATE TABLE IF NOT EXISTS Files(ID INTEGER PRIMARY KEY, filePath TEXT, fileName TEXT, tags TEXT)");    // create table for newly created databases
             if (!query.exec()) {
                 qDebug() << "Query execution error:" << query.lastError().text();
             } else {
@@ -69,6 +69,26 @@ public: void AddToDatabase(QString FilePath, QString FileName)
 };
 
 
+void MainWindow::LoadTags() {
+    QSqlQuery query;
+
+    query.exec("SELECT * FROM Files WHERE tags IS NOT NULL");
+    while (query.next()) {
+        QString tagsString = query.value("tags").toString();
+
+        // Split the tags string into a list of individual tags
+        QStringList tagsList = tagsString.split(" ", Qt::SkipEmptyParts);
+
+        // Add each tag as a separate item to the listWidget
+        for (const QString &tag : tagsList) {
+            QListWidgetItem *item = new QListWidgetItem(tag);
+            ui->listWidget->addItem(item);
+
+
+        }
+    }
+}
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -76,6 +96,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     DatabaseOperations().DatabaseConnection("Open");
+    LoadTags();
 }
 
 
@@ -161,4 +182,105 @@ void MainWindow::on_actionAdd_files_2_triggered()   // chatgpt generated code i 
         DatabaseOperations().AddToDatabase(filePath, fileName);
     }
 }
+
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString tag = ui->lineEdit->text();
+    QString fileName = ui->listWidget_2->currentItem()->text();
+    QSqlQuery query;
+
+    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
+    query.addBindValue("%" + fileName + "%");
+
+    if (query.exec()) {
+        if (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            qDebug() << filePath;
+
+            if (query.isNull("tags")) {
+                query.prepare("UPDATE Files SET tags = ? WHERE filePath = ?");
+            } else {
+                query.prepare("UPDATE Files SET tags = tags || ' ' || ? WHERE filePath = ?");
+            }
+
+            query.addBindValue(tag);
+            query.addBindValue(filePath);
+
+            if (query.exec()) {
+                qDebug() << "Update successful.";
+            } else {
+                qDebug() << "Update failed: " << query.lastError().text();
+            }
+        } else {
+            qDebug() << "No matching file found.";
+        }
+    } else {
+        qDebug() << "Query failed: " << query.lastError().text();
+    }
+}
+
+void MainWindow::on_lineEdit_2_textChanged(const QString &arg1)
+{
+    QString tag = ui->lineEdit->text();
+    QSqlQuery query;
+    ui->listWidget_2->clear();
+
+    if (tag.isEmpty()) {
+        // if the line edit is empty add all items back to the list
+        query.prepare("SELECT * FROM Files");
+    } else {
+        // if the line edit is not empty filter by tag
+        query.prepare("SELECT * FROM Files WHERE tags LIKE ?");
+        query.addBindValue("%" + tag + "%");
+    }
+
+    if (!query.exec()) {
+        qDebug() << "Query failed: " << query.lastError().text();
+    } else {
+        while (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            QString fileName = query.value("fileName").toString();
+            qDebug() << filePath;
+            qDebug() << fileName;
+            QListWidgetItem *item = new QListWidgetItem(QIcon(filePath), fileName);
+            ui->listWidget_2->addItem(item);
+        }
+    }
+}
+
+
+void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
+{
+    QString tag = ui->listWidget->currentItem()->text();
+    QSqlQuery query;
+    query.prepare("SELECT * FROM Files WHERE tags LIKE ?");
+    query.addBindValue("%" + tag + "%");
+
+    if (!query.exec()) {
+        qDebug() << "Query failed: " << query.lastError().text();
+    } else {
+        while (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            QString fileName = query.value("fileName").toString();
+
+            // check if a similar item already exists in widget
+            bool duplicateItem = false;
+            for (int i = 0; i < ui->listWidget_2->count(); ++i) {
+                QListWidgetItem *existingItem = ui->listWidget_2->item(i);
+                if (existingItem->text() == fileName) {
+                    duplicateItem = true;
+                    break;
+                }
+            }
+
+            // if the item isnt a duplicate add it to widget
+            if (!duplicateItem) {
+                QListWidgetItem *newItem = new QListWidgetItem(QIcon(filePath), fileName);
+                ui->listWidget_2->addItem(newItem);
+            }
+        }
+    }
+}
+
 

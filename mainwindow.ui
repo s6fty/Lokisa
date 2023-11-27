@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>774</width>
-    <height>673</height>
+    <width>761</width>
+    <height>677</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,20 +15,24 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
-     <spacer name="horizontalSpacer_2">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
+    <item row="2" column="0">
+     <widget class="QPushButton" name="pushButton">
+      <property name="text">
+       <string>Add tag</string>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
+     </widget>
     </item>
-    <item row="0" column="1" rowspan="8">
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Tags</string>
+      </property>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" rowspan="6">
      <spacer name="verticalSpacer">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
@@ -41,10 +45,10 @@
       </property>
      </spacer>
     </item>
-    <item row="7" column="0">
+    <item row="5" column="0">
      <widget class="QListWidget" name="listWidget"/>
     </item>
-    <item row="2" column="0">
+    <item row="1" column="0">
      <widget class="QLineEdit" name="lineEdit"/>
     </item>
     <item row="0" column="0">
@@ -52,16 +56,12 @@
       <property name="text">
        <string>Enter tag</string>
       </property>
-     </widget>
-    </item>
-    <item row="5" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Tags</string>
+      <property name="alignment">
+       <set>Qt::AlignCenter</set>
       </property>
      </widget>
     </item>
-    <item row="0" column="2" rowspan="8">
+    <item row="0" column="2" rowspan="6">
      <widget class="QListWidget" name="listWidget_2">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -71,7 +71,7 @@
       </property>
       <property name="maximumSize">
        <size>
-        <width>601</width>
+        <width>16777215</width>
         <height>16777215</height>
        </size>
       </property>
@@ -92,25 +92,8 @@
       </property>
      </widget>
     </item>
-    <item row="3" column="0">
-     <spacer name="horizontalSpacer_3">
-      <property name="orientation">
-       <enum>Qt::Horizontal</enum>
-      </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>40</width>
-        <height>20</height>
-       </size>
-      </property>
-     </spacer>
-    </item>
     <item row="4" column="0">
-     <widget class="QPushButton" name="pushButton">
-      <property name="text">
-       <string>Add tag</string>
-      </property>
-     </widget>
+     <widget class="QLineEdit" name="lineEdit_2"/>
     </item>
    </layout>
   </widget>
@@ -119,7 +102,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>774</width>
+     <width>761</width>
      <height>22</height>
     </rect>
    </property>

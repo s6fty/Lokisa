@@ -25,6 +25,14 @@ private slots:
 
     void on_actionAdd_files_2_triggered();
 
+    void on_pushButton_clicked();
+
+    void on_lineEdit_2_textChanged(const QString &arg1);
+
+    void on_listWidget_itemClicked(QListWidgetItem *item);
+
+    void LoadTags();
+
 private:
     Ui::MainWindow *ui;
 };
