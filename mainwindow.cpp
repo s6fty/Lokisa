@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
-#include <iostream>
 #include <QFileDialog>
 #include <QString>
 #include <QDebug>
@@ -190,22 +189,19 @@ void MainWindow::on_pushButton_clicked()
     QString fileName = ui->listWidget_2->currentItem()->text();
     QSqlQuery query;
 
-    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
-    query.addBindValue("%" + fileName + "%");
+    query.prepare("SELECT * FROM Files WHERE fileName LIKE ?");
+    query.addBindValue(fileName);
 
     if (query.exec()) {
         if (query.next()) {
-            QString filePath = query.value("filePath").toString();
-            qDebug() << filePath;
-
             if (query.isNull("tags")) {
-                query.prepare("UPDATE Files SET tags = ? WHERE filePath = ?");
+                query.prepare("UPDATE Files SET tags = ? WHERE fileName = ?");
             } else {
-                query.prepare("UPDATE Files SET tags = tags || ' ' || ? WHERE filePath = ?");
+                query.prepare("UPDATE Files SET tags = tags || ' ' || ? WHERE fileName = ?");
             }
 
             query.addBindValue(tag);
-            query.addBindValue(filePath);
+            query.addBindValue(fileName);
 
             if (query.exec()) {
                 qDebug() << "Update successful.";
@@ -278,6 +274,40 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
             if (!duplicateItem) {
                 QListWidgetItem *newItem = new QListWidgetItem(QIcon(filePath), fileName);
                 ui->listWidget_2->addItem(newItem);
+            }
+        }
+    }
+}
+
+
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    QString selectedTag = ui->lineEdit_2->text();
+    QString fileName = ui->listWidget_2->currentItem()->text();
+    QSqlQuery query;
+    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
+    query.addBindValue("%" + fileName + "%");
+
+    if (query.exec()) {
+        if (query.next()) {
+            QString tag = query.value(3).toString();
+
+            // Remove the selectedTag from the existing tags
+            tag.remove(selectedTag);
+
+            qDebug() << "Updated Tags:" << tag << "File Name:" << fileName;
+
+            // Update the database with the modified tags
+            QSqlQuery updateQuery;
+            updateQuery.prepare("UPDATE Files SET TAGS = ? WHERE filePath LIKE ?");
+            updateQuery.addBindValue(tag);
+            updateQuery.addBindValue("%" + fileName + "%");
+
+            if (updateQuery.exec()) {
+                qDebug() << "Tags updated successfully!";
+            } else {
+                qDebug() << "Failed to update tags:" << updateQuery.lastError().text();
             }
         }
     }
