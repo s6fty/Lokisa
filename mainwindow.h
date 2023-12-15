@@ -27,13 +27,13 @@ private slots:
 
     void on_pushButton_clicked();
 
-    void on_lineEdit_2_textChanged(const QString &arg1);
-
-    void on_listWidget_itemClicked(QListWidgetItem *item);
-
     void LoadTags();
 
     void on_pushButton_2_clicked();
+
+    void on_listWidget_itemDoubleClicked(QListWidgetItem *item);
+
+    void on_lineEdit_2_editingFinished();
 
 private:
     Ui::MainWindow *ui;

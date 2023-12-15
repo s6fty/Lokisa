@@ -12,7 +12,7 @@
 #include <QTextStream>
 #include <QInputDialog>
 #include <QDesktopServices>
-
+#include <QMessageBox>
 
 using namespace std;
 
@@ -70,7 +70,7 @@ public: void AddToDatabase(QString FilePath, QString FileName)
 
 void MainWindow::LoadTags() {
     QSqlQuery query;
-
+    ui->listWidget->clear();
     query.exec("SELECT * FROM Files WHERE tags IS NOT NULL");
     while (query.next()) {
         QString tagsString = query.value("tags").toString();
@@ -80,13 +80,25 @@ void MainWindow::LoadTags() {
 
         // Add each tag as a separate item to the listWidget
         for (const QString &tag : tagsList) {
-            QListWidgetItem *item = new QListWidgetItem(tag);
-            ui->listWidget->addItem(item);
+            // Check if the tag already exists in the listWidget
+            bool tagExists = false;
+            for (int i = 0; i < ui->listWidget->count(); ++i) {
+                QListWidgetItem *existingItem = ui->listWidget->item(i);
+                if (existingItem && existingItem->text() == tag) {
+                    tagExists = true;
+                    break;
+                }
+            }
 
-
+            // If the tag doesn't exist, add it to the listWidget
+            if (!tagExists) {
+                QListWidgetItem *item = new QListWidgetItem(tag);
+                ui->listWidget->addItem(item);
+            }
         }
     }
 }
+
 
 
 MainWindow::MainWindow(QWidget *parent)
@@ -109,7 +121,7 @@ void MainWindow::on_actionAdd_folder_triggered()
 {
     QDir folderName;
     folderName = QFileDialog::getExistingDirectory(this, tr("Open Directory"),"",QFileDialog::ShowDirsOnly);    // it says deprecated maybe change in future
-    QStringList images = folderName.entryList(QStringList() << "*.jpg" << "*.JPG" << "*.jpeg" << "*.JPEG" << "*.png" << "*.PNG", QDir::Files); // only jpg, jpeg and png now webm and mp4 in future
+    QStringList images = folderName.entryList(QStringList() << "*.jpg" << "*.JPG" << "*.jpeg" << "*.JPEG" << "*.png" << "*.PNG" << "*.mp4" << "*.MP4" << "*.webm" << "*.WEBM", QDir::Files); // only jpg, jpeg and png now webm and mp4 in future
     foreach (const QString file, images){
         QString Path = folderName.absolutePath().append("/" + file); // idk how to make this better it works so i wont touch that
         ui->listWidget_2->addItem(new QListWidgetItem(QIcon(Path), file));
@@ -214,40 +226,63 @@ void MainWindow::on_pushButton_clicked()
     } else {
         qDebug() << "Query failed: " << query.lastError().text();
     }
+    LoadTags();
 }
 
-void MainWindow::on_lineEdit_2_textChanged(const QString &arg1)
+void MainWindow::on_pushButton_2_clicked()
 {
-    QString tag = ui->lineEdit->text();
-    QSqlQuery query;
-    ui->listWidget_2->clear();
+    QString selectedTag = ui->lineEdit_2->text();
 
-    if (tag.isEmpty()) {
-        // if the line edit is empty add all items back to the list
-        query.prepare("SELECT * FROM Files");
-    } else {
-        // if the line edit is not empty filter by tag
-        query.prepare("SELECT * FROM Files WHERE tags LIKE ?");
-        query.addBindValue("%" + tag + "%");
+    // Check if an item is selected in the listWidget
+    QListWidgetItem* currentItem = ui->listWidget_2->currentItem();
+    if (!currentItem) {
+        QMessageBox::warning(this, "Warning", "No item selected!");
+        return;
     }
 
-    if (!query.exec()) {
-        qDebug() << "Query failed: " << query.lastError().text();
-    } else {
-        while (query.next()) {
-            QString filePath = query.value("filePath").toString();
-            QString fileName = query.value("fileName").toString();
-            qDebug() << filePath;
-            qDebug() << fileName;
-            QListWidgetItem *item = new QListWidgetItem(QIcon(filePath), fileName);
-            ui->listWidget_2->addItem(item);
+    QString fileName = currentItem->text();
+
+    QSqlQuery query;
+    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
+    query.addBindValue("%" + fileName + "%");
+
+    if (query.exec()) {
+        if (query.next()) {
+            QString tag = query.value(3).toString();
+
+            // Check if the selected tag is attached before removing
+            if (!tag.contains(selectedTag)) {
+                QMessageBox::warning(this, "Warning", "The selected tag is not attached to this item!");
+                return;
+            }
+
+            // Remove the selectedTag from the existing tags
+            tag.remove(selectedTag);
+
+            qDebug() << "Updated Tags:" << tag << "File Name:" << fileName;
+
+            // Update the database with the modified tags
+            QSqlQuery updateQuery;
+            updateQuery.prepare("UPDATE Files SET TAGS = ? WHERE filePath LIKE ?");
+            updateQuery.addBindValue(tag);
+            updateQuery.addBindValue("%" + fileName + "%");
+
+            if (updateQuery.exec()) {
+                qDebug() << "Tags updated successfully!";
+            } else {
+                qDebug() << "Failed to update tags:" << updateQuery.lastError().text();
+            }
         }
     }
+
+    LoadTags();
 }
 
 
-void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
+
+void MainWindow::on_listWidget_itemDoubleClicked(QListWidgetItem *item)
 {
+    ui->listWidget_2->clear();
     QString tag = ui->listWidget->currentItem()->text();
     QSqlQuery query;
     query.prepare("SELECT * FROM Files WHERE tags LIKE ?");
@@ -280,37 +315,35 @@ void MainWindow::on_listWidget_itemClicked(QListWidgetItem *item)
 }
 
 
-
-void MainWindow::on_pushButton_2_clicked()
+void MainWindow::on_lineEdit_2_editingFinished()
 {
-    QString selectedTag = ui->lineEdit_2->text();
-    QString fileName = ui->listWidget_2->currentItem()->text();
+    QString tag = ui->lineEdit_2->text();
     QSqlQuery query;
-    query.prepare("SELECT * FROM Files WHERE filePath LIKE ?");
-    query.addBindValue("%" + fileName + "%");
+    ui->listWidget_2->clear();
 
-    if (query.exec()) {
-        if (query.next()) {
-            QString tag = query.value(3).toString();
+    if (tag.isEmpty()) {
+        // If the line edit is empty, add all items back to the list
+        query.prepare("SELECT * FROM Files");
+    } else {
+        // If the line edit is not empty, filter by tag
+        query.prepare("SELECT * FROM Files WHERE tags LIKE ?");
+        query.addBindValue("%" + tag + "%");
+    }
 
-            // Remove the selectedTag from the existing tags
-            tag.remove(selectedTag);
+    if (!query.exec()) {
+        qDebug() << "Query failed: " << query.lastError().text();
+    } else {
+        while (query.next()) {
+            QString filePath = query.value("filePath").toString();
+            QString fileName = query.value("fileName").toString();
 
-            qDebug() << "Updated Tags:" << tag << "File Name:" << fileName;
-
-            // Update the database with the modified tags
-            QSqlQuery updateQuery;
-            updateQuery.prepare("UPDATE Files SET TAGS = ? WHERE filePath LIKE ?");
-            updateQuery.addBindValue(tag);
-            updateQuery.addBindValue("%" + fileName + "%");
-
-            if (updateQuery.exec()) {
-                qDebug() << "Tags updated successfully!";
+            // Ensure filePath is a valid path before using it as an icon
+            if (!filePath.isEmpty() && QFile::exists(filePath)) {
+                QListWidgetItem *item = new QListWidgetItem(QIcon(filePath), fileName);
+                ui->listWidget_2->addItem(item);
             } else {
-                qDebug() << "Failed to update tags:" << updateQuery.lastError().text();
+                qDebug() << "Invalid file path: " << filePath;
             }
         }
     }
 }
-
-
