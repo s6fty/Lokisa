@@ -3,11 +3,13 @@
 
 todo:
 * add video playback when hovered on item if its a video
-* fix stupid layout (pls someone who knows qt, help.)
-* add video preview support (maybe)
+* better layout (pls someone who knows qt, help.)
+* add video thumbnails
+* add removal of items
 
 things that work:
 * adding tags and removing tags
+* searching tags
 * importing
 * double click to open image
 * creating database from scratch
