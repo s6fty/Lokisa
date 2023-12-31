@@ -35,6 +35,12 @@ private slots:
 
     void on_lineEdit_2_editingFinished();
 
+    void on_listWidget_2_customContextMenuRequested(const QPoint &pos);
+
+public slots:
+
+    void deleteSelectedItem();
+
 private:
     Ui::MainWindow *ui;
 };

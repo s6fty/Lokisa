@@ -8,6 +8,7 @@
 #include <QListWidgetItem>
 #include <QIcon>
 #include <QtSql>
+#include <QFile>
 #include <QSqlDatabase>
 #include <QTextStream>
 #include <QInputDialog>
@@ -148,9 +149,6 @@ void MainWindow::on_listWidget_2_itemDoubleClicked(QListWidgetItem *item)
         qDebug() << "Query failed:" << query.lastError();
     }
 }
-
-
-
 
 
 void MainWindow::on_actionLoad_Database_triggered()
@@ -347,3 +345,54 @@ void MainWindow::on_lineEdit_2_editingFinished()
         }
     }
 }
+
+void MainWindow::on_listWidget_2_customContextMenuRequested(const QPoint &pos)
+{
+    qDebug() << "Custom context menu requested.";
+    // Get the item at the clicked position
+    QListWidgetItem *item = ui->listWidget_2->itemAt(pos);
+
+    if (item) {
+        // Create a context menu
+        QMenu contextMenu(this);
+
+        // Add actions to the context menu
+        QAction *deleteAction = new QAction("Delete", this);
+
+        // Connect actions to slots
+        connect(deleteAction, &QAction::triggered, this, &MainWindow::deleteSelectedItem);
+
+        // Add actions to the context menu
+        contextMenu.addAction(deleteAction);
+
+        // Show the context menu at the cursor position
+        contextMenu.exec(ui->listWidget_2->mapToGlobal(pos));
+    }
+}
+
+void MainWindow::deleteSelectedItem()
+{
+    // Handle deleting the selected item
+    QListWidgetItem *item = ui->listWidget_2->currentItem();
+    if (item) {
+        // Get information about the selected item
+        QString fileName = item->text();
+
+        // Remove the item from the listWidget
+        int row = ui->listWidget_2->row(item);
+        delete ui->listWidget_2->takeItem(row);
+
+        // Delete the corresponding entry from the database
+        QSqlQuery query;
+        query.prepare("DELETE FROM Files WHERE fileName = ?");
+        query.addBindValue(fileName);
+
+        if (query.exec()) {
+            qDebug() << "Item deleted from the database.";
+        } else {
+            qDebug() << "Failed to delete item from the database:" << query.lastError().text();
+        }
+    }
+}
+
+
